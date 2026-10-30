@@ -15,6 +15,7 @@
         ['Watumiaji', 'users.index', 'shield', 'manage-system'],
         ['Mipangilio', 'admin.settings.edit', 'cog', 'manage-system'],
         ['Nakala za akiba', 'admin.backups.index', 'download', 'manage-system'],
+        ['Kumbukumbu za kufuta', 'admin.deletions.index', 'trash', 'manage-system'],
     ];
     $isActive = fn (string $route) => request()->routeIs(str_replace('.index', '', $route).'*');
 @endphp

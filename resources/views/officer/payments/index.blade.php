@@ -78,6 +78,21 @@
                             @else
                                 <x-status-badge :status="$p->status" />
                             @endif
+                            @can('manage-system')
+                                {{-- Administrators only; the reason goes to the deletion log. --}}
+                                <div x-data="{ remove: false }" class="mt-2">
+                                    <button type="button" @click="remove = !remove" class="inline-flex items-center gap-1 text-xs text-slate-400 hover:text-rose-600">
+                                        <x-icon name="trash" class="h-3.5 w-3.5" /> {{ __('Futa') }}
+                                    </button>
+                                    <form x-show="remove" x-cloak method="POST" action="{{ route('payments.destroy', $p) }}" class="mt-2 w-64 space-y-2 rounded-xl bg-rose-50 p-3 ring-1 ring-rose-200"
+                                        onsubmit="return confirm(@js(__('Futa malipo :reference ya :amount kabisa? Salio na ripoti zitabadilika.', ['reference' => $p->reference, 'amount' => Money::format($p->amount)])))">
+                                        @csrf @method('DELETE')
+                                        <p class="text-xs text-rose-800">{{ __('Kwa malipo yaliyowekwa kwa makosa. Yataandikwa kwenye kumbukumbu za kufuta.') }}</p>
+                                        <input name="reason" required minlength="5" maxlength="190" placeholder="{{ __('Sababu ya kufuta') }}" class="w-full rounded-lg border-0 px-3 py-1.5 text-sm ring-1 ring-inset ring-rose-300 focus:ring-2 focus:ring-rose-500">
+                                        <x-button size="sm" variant="danger" class="w-full">{{ __('Futa malipo') }}</x-button>
+                                    </form>
+                                </div>
+                            @endcan
                         </td>
                     </tr>
                 @endforeach

@@ -151,6 +151,9 @@
                     @else
                         <p class="text-sm text-slate-600">{{ __('Ana malipo yaliyorekodiwa, kwa hiyo hawezi kufutwa bila kuharibu hesabu za kikundi. Ameacha kikundi? Badilisha hali yake kuwa "Ameondoka" kupitia Hariri.') }}</p>
                         <x-button variant="secondary" :href="route('members.edit', $member)" class="mt-4 w-full">{{ __('Hariri hali') }}</x-button>
+                        @can('manage-system')
+                            <x-button variant="danger" :href="route('members.delete-with-payments', $member)" class="mt-2 w-full">{{ __('Futa pamoja na malipo yake') }}</x-button>
+                        @endcan
                     @endif
                 </x-card>
             @endcan

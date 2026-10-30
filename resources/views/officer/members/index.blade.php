@@ -82,7 +82,11 @@
                         @can('manage-membership')
                             {{-- Clicks here must not open the member, which the whole row does. --}}
                             <td class="px-3 py-3 text-right" onclick="event.stopPropagation()">
-                                @if (in_array($member->id, $withPayments, true))
+                                @if (in_array($member->id, $withPayments, true) && auth()->user()->can('manage-system'))
+                                    <a href="{{ route('members.delete-with-payments', $member) }}" class="inline-flex rounded-lg p-2 text-slate-400 transition hover:bg-rose-50 hover:text-rose-600" title="{{ __('Futa pamoja na malipo yake') }}">
+                                        <x-icon name="trash" class="h-4 w-4" />
+                                    </a>
+                                @elseif (in_array($member->id, $withPayments, true))
                                     <span class="inline-flex cursor-not-allowed rounded-lg p-2 text-slate-300" title="{{ __('Ana malipo yaliyorekodiwa, kwa hiyo hawezi kufutwa bila kuharibu hesabu za kikundi. Ameacha kikundi? Badilisha hali yake kuwa "Ameondoka" kupitia Hariri.') }}">
                                         <x-icon name="trash" class="h-4 w-4" />
                                     </span>

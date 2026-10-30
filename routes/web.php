@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\BackupController;
+use App\Http\Controllers\Admin\DeletionController;
 use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Dev\UssdSimulatorController;
@@ -126,5 +127,11 @@ Route::middleware(['auth', 'can:officer'])->group(function () {
         Route::get('/admin/backups', [BackupController::class, 'index'])->name('admin.backups.index');
         Route::post('/admin/backups', [BackupController::class, 'store'])->name('admin.backups.store');
         Route::get('/admin/backups/{file}', [BackupController::class, 'download'])->name('admin.backups.download');
+
+        // Deleting money records: administrators only, with a reason, logged.
+        Route::get('/admin/deletions', [DeletionController::class, 'index'])->name('admin.deletions.index');
+        Route::delete('payments/{payment}', [DeletionController::class, 'payment'])->name('payments.destroy');
+        Route::get('members/{member}/delete', [DeletionController::class, 'confirmMember'])->name('members.delete-with-payments');
+        Route::delete('members/{member}/with-payments', [DeletionController::class, 'member'])->name('members.destroy-with-payments');
     });
 });
