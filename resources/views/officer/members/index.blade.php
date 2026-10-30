@@ -53,6 +53,7 @@
                         <th class="hidden px-5 py-3 sm:table-cell">{{ __('Wategemezi') }}</th>
                         <th class="hidden px-5 py-3 sm:table-cell">USSD</th>
                         <th class="px-5 py-3">{{ __('Hali') }}</th>
+                        @can('manage-membership') <th class="px-5 py-3"><span class="sr-only">{{ __('Futa mwanachama') }}</span></th> @endcan
                     </tr>
                 </x-slot:head>
                 @foreach ($members as $member)
@@ -78,6 +79,24 @@
                                 <p class="mt-1 text-xs text-slate-500">{{ $member->status_changed_at->diffForHumans() }}</p>
                             @endif
                         </td>
+                        @can('manage-membership')
+                            {{-- Clicks here must not open the member, which the whole row does. --}}
+                            <td class="px-3 py-3 text-right" onclick="event.stopPropagation()">
+                                @if (in_array($member->id, $withPayments, true))
+                                    <span class="inline-flex cursor-not-allowed rounded-lg p-2 text-slate-300" title="{{ __('Ana malipo yaliyorekodiwa, kwa hiyo hawezi kufutwa bila kuharibu hesabu za kikundi. Ameacha kikundi? Badilisha hali yake kuwa "Ameondoka" kupitia Hariri.') }}">
+                                        <x-icon name="trash" class="h-4 w-4" />
+                                    </span>
+                                @else
+                                    <form method="POST" action="{{ route('members.destroy', $member) }}"
+                                        onsubmit="return confirm(@js(__('Futa :name kabisa? Hili haliwezi kurudishwa.', ['name' => $member->full_name])))">
+                                        @csrf @method('DELETE')
+                                        <button class="rounded-lg p-2 text-slate-400 transition hover:bg-rose-50 hover:text-rose-600" title="{{ __('Futa mwanachama') }}" aria-label="{{ __('Futa mwanachama') }}: {{ $member->full_name }}">
+                                            <x-icon name="trash" class="h-4 w-4" />
+                                        </button>
+                                    </form>
+                                @endif
+                            </td>
+                        @endcan
                     </tr>
                 @endforeach
             </x-table>

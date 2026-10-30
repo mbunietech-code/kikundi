@@ -48,7 +48,10 @@ class MemberController extends Controller
 
         $counts = Member::query()->where('group_id', $this->groupId())->selectRaw('status, COUNT(*) as c')->groupBy('status')->pluck('c', 'status');
 
-        return view('officer.members.index', ['members' => $members, 'statuses' => self::STATUSES, 'status' => $status, 'counts' => $counts]);
+        return view('officer.members.index', [
+            'members' => $members, 'statuses' => self::STATUSES, 'status' => $status, 'counts' => $counts,
+            'withPayments' => $request->user()->can('manage-membership') ? app(MembershipService::class)->withPaymentHistory($members->getCollection()->modelKeys()) : [],
+        ]);
     }
 
     public function create(): View

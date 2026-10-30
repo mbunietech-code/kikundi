@@ -66,6 +66,20 @@ class DeleteMemberTest extends TestCase
         $this->assertModelExists($neema);
     }
 
+    public function test_members_list_has_a_delete_button_only_for_members_without_payments(): void
+    {
+        $fresh = Member::query()->create(['group_id' => 1, 'member_number' => 'M097', 'full_name' => 'Mpya Kabisa', 'phone' => '255754666666', 'status' => 'active']);
+        $neema = Member::query()->where('member_number', 'M003')->firstOrFail();
+
+        $html = $this->actingAs($this->officer())->get('/members')->assertOk()->getContent();
+
+        $this->assertStringContainsString('action="'.route('members.destroy', $fresh).'"', $html);
+        $this->assertStringNotContainsString('action="'.route('members.destroy', $neema).'"', $html);
+
+        $this->actingAs($this->officer('chair'))->get('/members')->assertOk()
+            ->assertDontSee('action="'.route('members.destroy', $fresh).'"', false);
+    }
+
     public function test_chair_and_treasurer_cannot_delete(): void
     {
         $fresh = Member::query()->create(['group_id' => 1, 'member_number' => 'M098', 'full_name' => 'Mpya', 'phone' => '255754777777', 'status' => 'active']);

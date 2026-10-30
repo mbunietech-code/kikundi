@@ -197,11 +197,25 @@ class MembershipService
      */
     public function canDelete(Member $member): bool
     {
-        return ! Allocation::query()->where('credited_member_id', $member->id)->exists()
-            && ! PaymentIntent::query()
-                ->where(fn ($q) => $q->where('payer_member_id', $member->id)->orWhere('credited_member_id', $member->id))
-                ->where('status', 'succeeded')
-                ->exists();
+        return $this->withPaymentHistory([$member->id]) === [];
+    }
+
+    /**
+     * Which of these members have money recorded for or by them, in two
+     * queries, so a whole list page can show its delete buttons.
+     *
+     * @param  list<int>  $memberIds
+     * @return list<int>
+     */
+    public function withPaymentHistory(array $memberIds): array
+    {
+        $credited = Allocation::query()->whereIn('credited_member_id', $memberIds)->distinct()->pluck('credited_member_id');
+        $intents = PaymentIntent::query()->where('status', 'succeeded')
+            ->where(fn ($q) => $q->whereIn('payer_member_id', $memberIds)->orWhereIn('credited_member_id', $memberIds))
+            ->get(['payer_member_id', 'credited_member_id']);
+
+        return $credited->merge($intents->pluck('payer_member_id'))->merge($intents->pluck('credited_member_id'))
+            ->map(fn ($id) => (int) $id)->intersect($memberIds)->unique()->values()->all();
     }
 
     /** Remove a member registered by mistake, with everything that only belongs to them. */
