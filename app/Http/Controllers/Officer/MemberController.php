@@ -91,6 +91,7 @@ class MemberController extends Controller
             'obligations' => $obligations,
             'outstanding' => $obligations->sum(fn ($row) => max(0, $row['obligation']->amount_due - $row['paid'])),
             'savings' => $balances->memberSavings($member),
+            'canDelete' => $membership->canDelete($member),
             'payments' => PaymentIntent::query()
                 ->where(fn ($q) => $q->where('credited_member_id', $member->id)->orWhere('payer_member_id', $member->id))
                 ->with(['payer', 'creditedMember'])
@@ -122,6 +123,19 @@ class MemberController extends Controller
         }
 
         return redirect()->route('members.show', $member)->with('status', __('Taarifa za mwanachama zimehifadhiwa.'));
+    }
+
+    public function destroy(Member $member, MembershipService $membership): RedirectResponse
+    {
+        $this->ensureGroup($member);
+
+        try {
+            $membership->delete($member);
+        } catch (\RuntimeException $e) {
+            return back()->with('error', $e->getMessage());
+        }
+
+        return redirect()->route('members.index')->with('status', __('Mwanachama :name (:number) amefutwa.', ['name' => $member->full_name, 'number' => $member->member_number]));
     }
 
     /** Photos stay on the private disk and are only shown to officers. */

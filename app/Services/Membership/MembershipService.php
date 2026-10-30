@@ -3,11 +3,18 @@
 namespace App\Services\Membership;
 
 use App\Jobs\SendSmsNotification;
+use App\Models\Allocation;
+use App\Models\ContributionEvent;
 use App\Models\Member;
 use App\Models\MembershipFee;
+use App\Models\PaymentIntent;
+use App\Models\SentReminder;
+use App\Models\UssdSession;
 use App\Services\Balances\BalanceService;
 use App\Support\Money;
 use App\Support\Settings;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use RuntimeException;
 
 /**
@@ -181,6 +188,44 @@ class MembershipService
         ));
 
         return true;
+    }
+
+    /**
+     * A member can be deleted only while no money has been recorded for or
+     * by them; otherwise reports and balances would change. Such members are
+     * marked as departed instead.
+     */
+    public function canDelete(Member $member): bool
+    {
+        return ! Allocation::query()->where('credited_member_id', $member->id)->exists()
+            && ! PaymentIntent::query()
+                ->where(fn ($q) => $q->where('payer_member_id', $member->id)->orWhere('credited_member_id', $member->id))
+                ->where('status', 'succeeded')
+                ->exists();
+    }
+
+    /** Remove a member registered by mistake, with everything that only belongs to them. */
+    public function delete(Member $member): void
+    {
+        if (! $this->canDelete($member)) {
+            throw new RuntimeException(__('Mwanachama huyu ana malipo yaliyorekodiwa, kwa hiyo hawezi kufutwa. Badilisha hali yake kuwa "Ameondoka".'));
+        }
+
+        DB::transaction(function () use ($member) {
+            PaymentIntent::query()->where(fn ($q) => $q->where('payer_member_id', $member->id)->orWhere('credited_member_id', $member->id))->delete();
+            ContributionEvent::query()->where('beneficiary_member_id', $member->id)->update(['beneficiary_member_id' => null]);
+            UssdSession::query()->where('member_id', $member->id)->update(['member_id' => null]);
+            SentReminder::query()->where('member_id', $member->id)->delete();
+            $member->obligations()->delete();
+            $member->fees()->delete();
+            $member->statusChanges()->delete();
+            $member->dependants()->delete();
+            $member->delete();
+        });
+
+        if ($member->photo_path) {
+            Storage::disk('local')->delete($member->photo_path);
+        }
     }
 
     private function createFee(Member $member, string $kind, int $amount): MembershipFee

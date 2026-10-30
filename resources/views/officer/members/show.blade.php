@@ -138,6 +138,22 @@
                     </form>
                 @endcan
             </x-card>
+
+            @can('manage-membership')
+                <x-card :title="__('Futa mwanachama')" class="border-rose-200">
+                    @if ($canDelete)
+                        <p class="text-sm text-slate-600">{{ __('Kwa aliyesajiliwa kwa makosa. Taarifa zake zote zitafutwa na haziwezi kurudishwa.') }}</p>
+                        <form method="POST" action="{{ route('members.destroy', $member) }}" class="mt-4"
+                            onsubmit="return confirm(@js(__('Futa :name kabisa? Hili haliwezi kurudishwa.', ['name' => $member->full_name])))">
+                            @csrf @method('DELETE')
+                            <x-button variant="danger" class="w-full">{{ __('Futa mwanachama') }}</x-button>
+                        </form>
+                    @else
+                        <p class="text-sm text-slate-600">{{ __('Ana malipo yaliyorekodiwa, kwa hiyo hawezi kufutwa bila kuharibu hesabu za kikundi. Ameacha kikundi? Badilisha hali yake kuwa "Ameondoka" kupitia Hariri.') }}</p>
+                        <x-button variant="secondary" :href="route('members.edit', $member)" class="mt-4 w-full">{{ __('Hariri hali') }}</x-button>
+                    @endif
+                </x-card>
+            @endcan
         </div>
 
         <div class="space-y-6 xl:col-span-2">

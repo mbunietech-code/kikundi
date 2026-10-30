@@ -66,6 +66,7 @@ Route::middleware(['auth', 'can:officer'])->group(function () {
         Route::post('members/enforce', [MembershipController::class, 'enforce'])->name('members.enforce');
         Route::get('members/{member}/edit', [MemberController::class, 'edit'])->name('members.edit');
         Route::put('members/{member}', [MemberController::class, 'update'])->name('members.update');
+        Route::delete('members/{member}', [MemberController::class, 'destroy'])->name('members.destroy');
         Route::put('members/{member}/pin', [MemberController::class, 'updatePin'])->name('members.pin');
         Route::post('members/{member}/reinstatement', [MembershipController::class, 'reinstate'])->name('members.reinstatement');
         Route::post('members/{member}/dependants', [DependantController::class, 'store'])->name('members.dependants.store');
