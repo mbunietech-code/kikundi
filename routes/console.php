@@ -59,8 +59,10 @@ Artisan::command('mjeshi:enforce-membership', function (MembershipService $membe
     }
 })->purpose('Mark members with too many unpaid months as not active');
 
-// Needs "php artisan schedule:run" every minute (Windows Task Scheduler on WAMP).
-Schedule::command('mjeshi:enforce-membership')->dailyAt('06:00');
+// Needs "php artisan schedule:run" every minute (Windows Task Scheduler on WAMP,
+// a Cron Job on Hostinger). Jobs run inside the scheduler's own PHP process,
+// because Hostinger's cron PHP has proc_open switched off.
+Schedule::call(fn () => Artisan::call('mjeshi:enforce-membership'))->name('mjeshi:enforce-membership')->dailyAt('06:00');
 
 Artisan::command('mjeshi:send-reminders', function (ReminderService $reminders) {
     foreach (Group::query()->where('status', 'active')->get() as $group) {
@@ -69,7 +71,7 @@ Artisan::command('mjeshi:send-reminders', function (ReminderService $reminders) 
     }
 })->purpose('Create the current month dues and send due SMS reminders');
 
-Schedule::command('mjeshi:send-reminders')->dailyAt('08:00');
+Schedule::call(fn () => Artisan::call('mjeshi:send-reminders'))->name('mjeshi:send-reminders')->dailyAt('08:00');
 
 Artisan::command('mjeshi:backup', function (BackupService $backups) {
     $name = $backups->create();
@@ -77,11 +79,12 @@ Artisan::command('mjeshi:backup', function (BackupService $backups) {
     $this->info(__('Nakala imehifadhiwa: :path. Za zamani zilizofutwa: :removed.', ['path' => 'storage/app/private/'.$name, 'removed' => $removed]));
 })->purpose('Back up the database and member photos, and remove old backups');
 
-Schedule::command('mjeshi:backup')->dailyAt('01:00');
+Schedule::call(fn () => Artisan::call('mjeshi:backup'))->name('mjeshi:backup')->dailyAt('01:00');
 
 // On WAMP there is no always-on worker: send queued SMS from the scheduler.
 // Each run stops when the queue is empty or before the next minute starts.
-Schedule::command('queue:work --stop-when-empty --max-time=50 --tries=3')
+Schedule::call(fn () => Artisan::call('queue:work', ['--stop-when-empty' => true, '--max-time' => 50, '--tries' => 3]))
+    ->name('queue:work')
     ->everyMinute()
     ->withoutOverlapping(5);
 
