@@ -101,7 +101,7 @@
             @forelse ($dues as ['obligation' => $o, 'paid' => $paid])
                 <div class="flex items-center justify-between gap-3 border-b border-slate-100 px-5 py-3 last:border-0">
                     <div>
-                        <p class="font-medium text-slate-900">{{ \Carbon\Carbon::createFromFormat('Y-m', $o->period)->translatedFormat('F Y') }}</p>
+                        <p class="font-medium text-slate-900">{{ \Carbon\Carbon::createFromFormat('Y-m-d', $o->period.'-01')->translatedFormat('F Y') }}</p>
                         <p class="text-xs text-slate-500">{{ __(':paid kati ya :due', ['paid' => Money::format($paid), 'due' => Money::format($o->amount_due)]) }}</p>
                     </div>
                     <x-status-badge :status="$paid >= $o->amount_due ? 'paid' : ($paid > 0 ? 'partial' : 'unpaid')" />

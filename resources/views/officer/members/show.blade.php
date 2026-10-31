@@ -226,6 +226,30 @@
             </div>
 
             <x-card :title="__('Ada kwa mwezi')" :padded="false">
+                <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 px-5 py-3 text-sm">
+                    <p>
+                        @if ($member->dues_amount !== null)
+                            {{ __('Ada maalum') }}: <span class="font-semibold">{{ Money::format($member->dues_amount) }}</span> {{ __('kwa mwezi') }}
+                        @else
+                            {{ __('Ada ya kawaida ya kikundi') }}@if ($groupDues): <span class="font-semibold">{{ Money::format($groupDues) }}</span> {{ __('kwa mwezi') }}@endif
+                        @endif
+                    </p>
+                    @can('manage-finance')
+                        <form method="POST" action="{{ route('members.dues-amount', $member) }}" class="flex items-end gap-2" x-data>
+                            @csrf @method('PUT')
+                            <input type="number" name="dues_amount" min="0" step="100" value="{{ old('dues_amount', $member->dues_amount) }}" placeholder="{{ $groupDues ? number_format($groupDues, 0, '.', '') : '' }}"
+                                class="w-32 rounded-lg border-0 px-3 py-1.5 text-sm shadow-sm ring-1 ring-inset ring-slate-300 focus:ring-2 focus:ring-emerald-600" aria-label="{{ __('Ada maalum (TSh)') }}">
+                            <x-button size="sm" variant="secondary">{{ __('Weka ada') }}</x-button>
+                            @if ($member->dues_amount !== null)
+                                <x-button size="sm" variant="ghost" type="submit" @click="$el.form.dues_amount.value = ''">{{ __('Rudisha ya kawaida') }}</x-button>
+                            @endif
+                        </form>
+                    @endcan
+                </div>
+                @error('dues_amount') <p class="px-5 pt-2 text-xs text-rose-600">{{ $message }}</p> @enderror
+                @can('manage-finance')
+                    <p class="px-5 pt-2 text-xs text-slate-500">{{ __('Acha wazi kwa ada ya kawaida. Mabadiliko yanaanza mwezi huu kwa miezi ambayo bado haijalipwa.') }}</p>
+                @endcan
                 @if ($obligations->isEmpty())
                     <x-empty icon="calendar" :title="__('Hakuna ada iliyopangwa')" :text="__('Zalisha madeni ya mwezi kwenye ukurasa wa Ada.')" />
                 @else
@@ -234,7 +258,7 @@
                         @foreach ($obligations as $row)
                             @php $o = $row['obligation']; $state = $row['paid'] >= $o->amount_due ? 'paid' : ($row['paid'] > 0 ? 'partial' : 'unpaid'); @endphp
                             <tr>
-                                <td class="px-5 py-3 font-medium">{{ \Carbon\Carbon::createFromFormat('Y-m', $o->period)->translatedFormat('F Y') }}</td>
+                                <td class="px-5 py-3 font-medium">{{ \Carbon\Carbon::createFromFormat('Y-m-d', $o->period.'-01')->translatedFormat('F Y') }}</td>
                                 <td class="px-5 py-3 text-right">{{ Money::format($o->amount_due) }}</td>
                                 <td class="px-5 py-3 text-right">{{ Money::format($row['paid']) }}</td>
                                 <td class="px-5 py-3"><x-status-badge :status="$state" /></td>

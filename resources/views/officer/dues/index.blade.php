@@ -27,7 +27,7 @@
 
     <div class="mt-6 grid gap-6 xl:grid-cols-3">
         <x-card :padded="false" class="xl:col-span-2">
-            <x-slot:title>{{ __('Wanachama') }} · {{ \Carbon\Carbon::createFromFormat('Y-m', $period)->translatedFormat('F Y') }}</x-slot:title>
+            <x-slot:title>{{ __('Wanachama') }} · {{ \Carbon\Carbon::createFromFormat('Y-m-d', $period.'-01')->translatedFormat('F Y') }}</x-slot:title>
             <x-slot:actions>
                 <form method="GET">
                     <select name="period" onchange="this.form.submit()" class="rounded-lg border-0 py-1.5 pl-3 pr-8 text-sm ring-1 ring-inset ring-slate-300">
@@ -47,7 +47,7 @@
                         <tr>
                             <td class="px-5 py-3">
                                 <a href="{{ route('members.show', $o->member) }}" class="font-medium text-slate-900 hover:text-emerald-700">{{ $o->member->full_name }}</a>
-                                <p class="text-xs text-slate-500">{{ $o->member->member_number }}</p>
+                                <p class="text-xs text-slate-500">{{ $o->member->member_number }}@if ($o->member->dues_amount !== null) · <span class="font-medium text-violet-700">{{ __('Ada maalum') }}</span>@endif</p>
                             </td>
                             <td class="px-5 py-3 text-right">{{ Money::format($o->amount_due) }}</td>
                             <td class="px-5 py-3 text-right">{{ Money::format($row['paid']) }}</td>

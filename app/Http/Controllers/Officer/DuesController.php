@@ -4,10 +4,12 @@ namespace App\Http\Controllers\Officer;
 
 use App\Http\Controllers\Controller;
 use App\Models\DuesRule;
+use App\Models\Member;
 use App\Models\Obligation;
 use App\Services\Balances\BalanceService;
 use App\Services\Dues\DuesService;
 use App\Services\Reminders\ReminderService;
+use App\Support\Money;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -60,6 +62,21 @@ class DuesController extends Controller
         $dues->changeRule($this->groupId(), (int) $data['amount'], CarbonImmutable::parse($data['effective_from']));
 
         return back()->with('status', __('Kiwango kipya cha ada kimehifadhiwa.'));
+    }
+
+    /** A member's own monthly dues, or back to the group amount when left empty. */
+    public function memberAmount(Request $request, Member $member, DuesService $dues): RedirectResponse
+    {
+        $this->ensureGroup($member);
+        $data = $request->validate(['dues_amount' => ['nullable', 'integer', 'min:0', 'max:100000000']], [], ['dues_amount' => __('ada ya mwezi')]);
+        $amount = filled($data['dues_amount'] ?? null) ? (int) $data['dues_amount'] : null;
+
+        $changed = $dues->setMemberAmount($member, $amount, now()->format('Y-m'));
+
+        return back()->with('status', ($amount === null
+            ? __(':name sasa analipa ada ya kawaida ya kikundi.', ['name' => $member->full_name])
+            : __('Ada ya :name sasa ni :amount kwa mwezi.', ['name' => $member->full_name, 'amount' => Money::format($amount)]))
+            .($changed ? ' '.__('Miezi :count ambayo bado haijalipwa imebadilishwa.', ['count' => $changed]) : ''));
     }
 
     public function generate(Request $request, DuesService $dues): RedirectResponse

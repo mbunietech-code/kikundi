@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Hidden(['pin_hash'])]
-#[Fillable(['group_id', 'user_id', 'member_number', 'full_name', 'phone', 'locale', 'address', 'photo_path', 'joined_at', 'status', 'status_changed_at', 'pin_hash', 'pin_failed_attempts', 'pin_locked_until'])]
+#[Fillable(['group_id', 'user_id', 'member_number', 'full_name', 'phone', 'locale', 'address', 'photo_path', 'joined_at', 'status', 'status_changed_at', 'dues_amount', 'pin_hash', 'pin_failed_attempts', 'pin_locked_until'])]
 class Member extends Model implements AuthenticatableContract
 {
     use Authenticatable;

@@ -795,5 +795,16 @@
     "Weka namba sahihi ya simu, mfano 0712345678, au ya nje ya nchi kwa + na msimbo wa nchi, mfano +86 138 0013 8000.": "Enter a valid phone number, e.g. 0712345678, or a foreign one with + and the country code, e.g. +86 138 0013 8000.",
     "Jaribio la mwisho: :phone saa :time": "Last test: :phone at :time",
     "Tanzania: 07XXXXXXXX. Nje ya nchi: anza na + na msimbo wa nchi, mfano +86 138 0013 8000.": "Tanzania: 07XXXXXXXX. Abroad: start with + and the country code, e.g. +86 138 0013 8000.",
-    "Inatolewa na mfumo kwa mpangilio wakati wa kuhifadhi.": "Given by the system in order when you save."
+    "Inatolewa na mfumo kwa mpangilio wakati wa kuhifadhi.": "Given by the system in order when you save.",
+    "ada ya mwezi": "monthly dues",
+    ":name sasa analipa ada ya kawaida ya kikundi.": ":name now pays the group's standard dues.",
+    "Ada ya :name sasa ni :amount kwa mwezi.": ":name's dues are now :amount a month.",
+    "Miezi :count ambayo bado haijalipwa imebadilishwa.": ":count unpaid months were updated.",
+    "Ada maalum": "Custom dues",
+    "kwa mwezi": "a month",
+    "Ada ya kawaida ya kikundi": "Group standard dues",
+    "Ada maalum (TSh)": "Custom dues (TSh)",
+    "Weka ada": "Set dues",
+    "Rudisha ya kawaida": "Back to standard",
+    "Acha wazi kwa ada ya kawaida. Mabadiliko yanaanza mwezi huu kwa miezi ambayo bado haijalipwa.": "Leave empty for the standard dues. Changes apply from this month to months not yet paid."
 }

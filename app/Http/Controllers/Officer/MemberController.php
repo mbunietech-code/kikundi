@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Member;
 use App\Models\PaymentIntent;
 use App\Services\Balances\BalanceService;
+use App\Services\Dues\DuesService;
 use App\Services\Membership\MembershipService;
 use App\Support\Locale;
 use App\Support\Phone;
@@ -107,6 +108,7 @@ class MemberController extends Controller
             'unpaidMonths' => $membership->unpaidMonths($member),
             'graceMonths' => (int) Settings::get('grace_months'),
             'obligations' => $obligations,
+            'groupDues' => app(DuesService::class)->currentRule($member->group_id)?->amount,
             'outstanding' => $obligations->sum(fn ($row) => max(0, $row['obligation']->amount_due - $row['paid'])),
             'savings' => $balances->memberSavings($member),
             'canDelete' => $membership->canDelete($member),

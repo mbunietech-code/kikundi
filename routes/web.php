@@ -104,6 +104,7 @@ Route::middleware(['auth', 'can:officer'])->group(function () {
     Route::middleware('can:manage-finance')->group(function () {
         Route::post('dues/rule', [DuesController::class, 'storeRule'])->name('dues.rule');
         Route::post('dues/generate', [DuesController::class, 'generate'])->name('dues.generate');
+        Route::put('members/{member}/dues-amount', [DuesController::class, 'memberAmount'])->name('members.dues-amount');
         Route::post('reminders/run', [ReminderController::class, 'run'])->name('reminders.run');
         Route::post('reminders/debts', [ReminderController::class, 'debts'])->name('reminders.debts');
 
