@@ -88,7 +88,7 @@
                     @if ($beemTest && $beemTest['request_id'])
                         <form method="POST" action="{{ route('admin.integrations.delivery') }}" class="mt-3">
                             @csrf
-                            <p class="mb-2 text-xs text-slate-500">{{ __('Jaribio la mwisho: 0:phone saa :time', ['phone' => substr($beemTest['phone'], 3), 'time' => $beemTest['at']]) }}</p>
+                            <p class="mb-2 text-xs text-slate-500">{{ __('Jaribio la mwisho: :phone saa :time', ['phone' => \App\Support\Phone::display($beemTest['phone']), 'time' => $beemTest['at']]) }}</p>
                             <x-button variant="ghost" class="w-full">{{ __('Angalia kama imefika') }}</x-button>
                         </form>
                     @endif

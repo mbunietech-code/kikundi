@@ -104,8 +104,8 @@ class IntegrationController extends Controller
         $data = $request->validate(['phone' => ['required', 'string', 'max:20']]);
         $phone = Phone::normalise($data['phone']);
 
-        if (! preg_match('/^255[67]\d{8}$/', $phone)) {
-            return back()->withErrors(['phone' => __('Weka namba sahihi ya simu, mfano 0712345678.')]);
+        if (! preg_match(Phone::RULE, $phone)) {
+            return back()->withErrors(['phone' => __('Weka namba sahihi ya simu, mfano 0712345678, au ya nje ya nchi kwa + na msimbo wa nchi, mfano +86 138 0013 8000.')]);
         }
 
         try {
@@ -116,7 +116,7 @@ class IntegrationController extends Controller
 
         $request->session()->put('beem_test', ['phone' => $phone, 'request_id' => $requestId, 'at' => now()->format('H:i')]);
 
-        return back()->with('status', __('Beem imepokea SMS kwa :phone. Subiri dakika moja kisha bonyeza "Angalia kama imefika".', ['phone' => '0'.substr($phone, 3)]));
+        return back()->with('status', __('Beem imepokea SMS kwa :phone. Subiri dakika moja kisha bonyeza "Angalia kama imefika".', ['phone' => Phone::display($phone)]));
     }
 
     /** Ask Beem whether the last test SMS reached the phone. */
@@ -135,6 +135,6 @@ class IntegrationController extends Controller
         }
 
         return back()->with(strtoupper((string) $status) === 'DELIVERED' ? 'status' : 'error',
-            __('Hali ya SMS kwa :phone kwa mujibu wa Beem: :status', ['phone' => '0'.substr($test['phone'], 3), 'status' => $status ?: __('bado haijaripotiwa')]));
+            __('Hali ya SMS kwa :phone kwa mujibu wa Beem: :status', ['phone' => Phone::display($test['phone']), 'status' => $status ?: __('bado haijaripotiwa')]));
     }
 }

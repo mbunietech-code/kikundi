@@ -141,7 +141,7 @@
                                     <span class="text-slate-500">· {{ __('Si mwanachama') }}</span>
                                 @endif
                                 <span class="block text-xs text-slate-500">
-                                    {{ $guarantor->phone ? '0'.substr($guarantor->phone, 3) : '' }}{{ $guarantor->phone && $guarantor->relationship ? ' · ' : '' }}{{ $guarantor->relationship }}
+                                    {{ \App\Support\Phone::display($guarantor->phone) }}{{ $guarantor->phone && $guarantor->relationship ? ' · ' : '' }}{{ $guarantor->relationship }}
                                 </span>
                             </span>
                             @can('manage-membership')

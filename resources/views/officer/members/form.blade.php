@@ -16,7 +16,7 @@
                 <x-input :label="__('Namba ya uanachama')" name="member_number" :value="$member->member_number" placeholder="M001" required
                     :hint="$member->exists ? null : __('Imejazwa namba inayofuata. Unaweza kuibadilisha.')" />
                 <x-input :label="__('Jina kamili')" name="full_name" :value="$member->full_name" required />
-                <x-input :label="__('Simu')" name="phone" :value="$member->phone ? '0'.substr($member->phone, 3) : null" placeholder="0712345678" :hint="__('Itahifadhiwa kama 2557XXXXXXXX')" required />
+                <x-input :label="__('Simu')" name="phone" :value="\App\Support\Phone::display($member->phone) ?: null" placeholder="0712345678" :hint="__('Tanzania: 07XXXXXXXX. Nje ya nchi: anza na + na msimbo wa nchi, mfano +86 138 0013 8000.')" required />
                 <x-input :label="__('Tarehe ya kujiunga')" name="joined_at" type="date" :value="$member->joined_at?->format('Y-m-d')" required />
                 <x-input :label="__('Makazi')" name="address" :value="$member->address" :placeholder="__('Mtaa, kata')" />
                 <x-select :label="__('Lugha ya SMS na USSD')" name="locale" :value="$member->locale"

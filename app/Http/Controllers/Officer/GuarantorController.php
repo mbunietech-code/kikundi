@@ -74,13 +74,13 @@ class GuarantorController extends Controller
             'guarantors.*.member_id' => ['nullable', 'distinct', Rule::notIn([$member?->id]),
                 Rule::exists('members', 'id')->where('group_id', $this->groupId())->where('status', 'active')],
             'guarantors.*.name' => ['nullable', 'required_without:guarantors.*.member_id', 'string', 'max:120'],
-            'guarantors.*.phone' => ['nullable', 'required_without:guarantors.*.member_id', 'regex:/^255[67]\d{8}$/'],
+            'guarantors.*.phone' => ['nullable', 'required_without:guarantors.*.member_id', 'regex:'.Phone::RULE],
             'guarantors.*.relationship' => ['nullable', 'string', 'max:60'],
         ], [
             'guarantors.*.member_id.exists' => __('Mdhamini lazima awe mwanachama hai.'),
             'guarantors.*.member_id.not_in' => __('Mwanachama hawezi kujidhamini mwenyewe.'),
             'guarantors.*.member_id.distinct' => __('Mdhamini mmoja amechaguliwa mara mbili.'),
-            'guarantors.*.phone.regex' => __('Weka namba sahihi ya simu, mfano 0712345678.'),
+            'guarantors.*.phone.regex' => __('Weka namba sahihi ya simu, mfano 0712345678, au ya nje ya nchi kwa + na msimbo wa nchi, mfano +86 138 0013 8000.'),
         ], [
             'guarantors' => __('wadhamini'),
             'guarantors.*.name' => __('jina la mdhamini'),

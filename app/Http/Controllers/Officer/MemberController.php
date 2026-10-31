@@ -186,14 +186,14 @@ class MemberController extends Controller
         $data = $request->validate([
             'member_number' => ['required', 'string', 'max:20', Rule::unique('members')->where('group_id', $this->groupId())->ignore($member?->id)],
             'full_name' => ['required', 'string', 'max:120'],
-            'phone' => ['required', 'regex:/^255[67]\d{8}$/'],
+            'phone' => ['required', 'regex:'.Phone::RULE],
             'address' => ['nullable', 'string', 'max:190'],
             'joined_at' => ['required', 'date'],
             'photo' => ['nullable', 'image', 'max:2048'],
             'locale' => ['nullable', Rule::in(array_keys(Locale::SUPPORTED))],
             'status_action' => ['nullable', Rule::in(['active', ...array_keys(self::MANUAL_STATUSES)])],
             'status_reason' => ['nullable', 'string', 'max:190'],
-        ], ['phone.regex' => __('Weka namba sahihi ya simu, mfano 0712345678.')], [
+        ], ['phone.regex' => __('Weka namba sahihi ya simu, mfano 0712345678, au ya nje ya nchi kwa + na msimbo wa nchi, mfano +86 138 0013 8000.')], [
             'member_number' => __('namba ya uanachama'), 'full_name' => __('jina kamili'), 'phone' => __('simu'), 'joined_at' => __('tarehe ya kujiunga'), 'photo' => __('picha'), 'locale' => __('lugha'),
         ]);
 
