@@ -120,7 +120,10 @@
                                 <span class="text-xs font-normal text-slate-500">· {{ $p->payer_member_id === $member->id ? __('kwa :name', ['name' => $p->creditedMember->full_name]) : __('kutoka :name', ['name' => $p->payer->full_name]) }}</span>
                             @endif
                         </p>
-                        <p class="font-mono text-xs text-slate-500">{{ $p->reference }} · {{ $p->created_at->format('d/m/Y') }}</p>
+                        <p class="font-mono text-xs text-slate-500">{{ $p->payment?->receipt_number ?? $p->reference }} · {{ $p->created_at->format('d/m/Y') }}</p>
+                        @if ($p->payment)
+                            <a href="{{ route('member.receipt', $p->payment) }}" target="_blank" class="text-xs font-medium text-emerald-700 hover:underline">{{ __('Pakua risiti') }}</a>
+                        @endif
                     </div>
                     <div class="text-right">
                         <p class="text-sm font-semibold">{{ Money::format($p->amount) }}</p>

@@ -28,6 +28,7 @@ class SettingsController extends Controller
             'reinstatement_fee' => ['sometimes', 'required', 'integer', 'min:0'],
             'reinstate_requires_arrears' => ['sometimes', 'required', 'in:0,1'],
             'min_guarantors' => ['sometimes', 'required', 'integer', 'min:0', 'max:3'],
+            'event_grace_days' => ['sometimes', 'required', 'integer', 'min:0', 'max:365'],
             'dues_due_day' => ['sometimes', 'required', 'integer', 'min:1', 'max:28'],
             'reminder_days_before' => ['sometimes', 'required', 'integer', 'min:0', 'max:14'],
             'reminders_enabled' => ['sometimes', 'required', 'in:0,1'],

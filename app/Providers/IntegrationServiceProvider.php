@@ -8,19 +8,23 @@ use App\Integrations\AzamPay\AzamPayGateway;
 use App\Integrations\Beem\BeemSmsGateway;
 use App\Integrations\Beem\LogSmsGateway;
 use App\Integrations\Beem\ManualPaymentGateway;
+use App\Integrations\ClickPesa\ClickPesaGateway;
+use App\Support\Settings;
 use Illuminate\Support\ServiceProvider;
 
 class IntegrationServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        $this->app->bind(SmsGateway::class, fn () => config('beem.sms.driver') === 'beem'
+        // The administrator's choice in the settings wins over .env.
+        $this->app->bind(SmsGateway::class, fn () => (Settings::get('sms_driver') ?: config('beem.sms.driver')) === 'beem'
             ? new BeemSmsGateway
             : new LogSmsGateway);
 
-        // "manual" until the group's AzamPay account is live; then "azampay".
-        $this->app->bind(PaymentGateway::class, fn () => config('services.payments.driver') === 'azampay'
-            ? new AzamPayGateway
-            : new ManualPaymentGateway);
+        $this->app->bind(PaymentGateway::class, fn () => match (Settings::get('payment_gateway') ?: config('services.payments.driver')) {
+            'azampay' => new AzamPayGateway,
+            'clickpesa' => new ClickPesaGateway,
+            default => new ManualPaymentGateway,
+        });
     }
 }

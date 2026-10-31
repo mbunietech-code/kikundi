@@ -57,6 +57,7 @@
                     <x-input :label="__('Miezi ya neema')" name="grace_months" type="number" min="1" :value="$settings['grace_months']" :hint="__('Asipolipa miezi hii, si hai.')" />
                     <x-input :label="__('Kiingilio (TSh)')" name="entry_fee" type="number" min="0" :value="$settings['entry_fee']" :hint="__('0 = hakuna kiingilio.')" />
                     <x-input :label="__('Kiingilio cha kurejea (TSh)')" name="reinstatement_fee" type="number" min="0" :value="$settings['reinstatement_fee']" />
+                    <x-input :label="__('Siku za neema za michango')" name="event_grace_days" type="number" min="0" :value="$settings['event_grace_days']" :hint="__('Baada ya tarehe ya mwisho ya mchango. 0 = usimzime.')" />
                     <x-input :label="__('Wadhamini wa lazima')" name="min_guarantors" type="number" min="0" max="3" :value="$settings['min_guarantors']" :hint="__('Kwa mwanachama mpya. 0 = si lazima.')" />
                 </div>
                 <label class="mt-5 flex items-start gap-3 rounded-lg bg-slate-50 p-3 text-sm">

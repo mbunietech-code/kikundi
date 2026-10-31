@@ -59,6 +59,7 @@ class VerifiedPaymentService
                 'verified_at' => now(),
                 'status' => 'posted',
             ]);
+            $payment->update(['receipt_number' => Payment::receiptNumberFor($payment->id)]);
 
             $payment->allocations()->create([
                 'group_id' => $intent->group_id,
@@ -80,10 +81,10 @@ class VerifiedPaymentService
 
                 SendSmsNotification::dispatch(
                     $intent->payer_msisdn ?: $intent->payer->phone,
-                    __('Tumepokea :amount kwa :purpose. Kumbukumbu :reference. Deni lililobaki: :owed. :system', [
+                    __('Risiti :receipt: Tumepokea :amount kwa :purpose. Deni lililobaki: :owed. :system', [
                         'amount' => Money::format($amount, $intent->currency),
                         'purpose' => $purpose,
-                        'reference' => $intent->reference,
+                        'receipt' => $payment->receipt_number,
                         'owed' => Money::format($owed, $intent->currency),
                         'system' => Settings::systemName(),
                     ], $locale),
@@ -99,7 +100,7 @@ class VerifiedPaymentService
         return $payment;
     }
 
-    private function purpose(PaymentIntent $intent, string $locale): string
+    public function purpose(PaymentIntent $intent, string $locale): string
     {
         return match ($intent->target_type) {
             'dues' => __('ada ya :month', ['month' => ($period = Obligation::query()->whereKey($intent->target_id)->value('period'))

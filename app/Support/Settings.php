@@ -3,7 +3,9 @@
 namespace App\Support;
 
 use App\Models\Setting;
+use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Crypt;
 
 /**
  * Admin-editable system settings, such as the system name shown on the
@@ -25,6 +27,8 @@ class Settings
         'reinstatement_fee' => '20000',
         'reinstate_requires_arrears' => '1',
         'min_guarantors' => '0',
+        // Days after a fixed contribution's last day before an unpaid member is made not active; 0 = never.
+        'event_grace_days' => '30',
         // Payment deadlines and SMS reminders.
         'dues_due_day' => '10',
         'reminder_days_before' => '3',
@@ -32,13 +36,40 @@ class Settings
         'backup_keep_days' => '14',
         // Empty means the APP_LOCALE from .env.
         'default_locale' => '',
+        // Beem SMS. Empty values fall back to .env.
+        'sms_driver' => '',
+        'beem_api_key' => '',
+        'beem_secret_key' => '',
+        'beem_sender_id' => '',
+        // Mobile-money collection: "manual", "azampay" or "clickpesa"; empty = .env.
+        'payment_gateway' => '',
+        'clickpesa_client_id' => '',
+        'clickpesa_api_key' => '',
+        'clickpesa_checksum_key' => '',
+        'clickpesa_webhook_token' => '',
     ];
+
+    /** Stored encrypted and never shown back on a page. */
+    public const SECRETS = ['beem_api_key', 'beem_secret_key', 'clickpesa_api_key', 'clickpesa_checksum_key'];
 
     public static function all(): array
     {
         $stored = Cache::rememberForever(self::CACHE_KEY, fn () => Setting::query()->pluck('value', 'key')->all());
 
-        return array_merge(self::DEFAULTS, array_filter($stored, fn ($value) => $value !== null && $value !== ''));
+        $values = array_merge(self::DEFAULTS, array_filter($stored, fn ($value) => $value !== null && $value !== ''));
+
+        foreach (self::SECRETS as $key) {
+            if ($values[$key] !== '') {
+                try {
+                    $values[$key] = Crypt::decryptString($values[$key]);
+                } catch (DecryptException) {
+                    // A changed APP_KEY makes old secrets unreadable; treat them as not set.
+                    $values[$key] = '';
+                }
+            }
+        }
+
+        return $values;
     }
 
     public static function get(string $key, ?string $default = null): ?string
@@ -51,6 +82,10 @@ class Settings
         foreach ($values as $key => $value) {
             if (! array_key_exists($key, self::DEFAULTS)) {
                 continue;
+            }
+
+            if (in_array($key, self::SECRETS, true) && filled($value)) {
+                $value = Crypt::encryptString($value);
             }
 
             Setting::query()->updateOrCreate(['key' => $key], ['value' => $value, 'updated_by' => $userId]);

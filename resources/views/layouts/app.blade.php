@@ -14,6 +14,7 @@
     $systemNav = [
         ['Watumiaji', 'users.index', 'shield', 'manage-system'],
         ['Mipangilio', 'admin.settings.edit', 'cog', 'manage-system'],
+        ['SMS na malipo', 'admin.integrations.edit', 'banknotes', 'manage-system'],
         ['Nakala za akiba', 'admin.backups.index', 'download', 'manage-system'],
         ['Kumbukumbu za kufuta', 'admin.deletions.index', 'trash', 'manage-system'],
     ];

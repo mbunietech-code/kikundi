@@ -22,6 +22,22 @@ class MembershipController extends Controller
             : __('Hakuna mwanachama aliyebadilika hali.'));
     }
 
+    public function toggle(Request $request, Member $member, MembershipService $membership): RedirectResponse
+    {
+        $this->ensureGroup($member);
+        $data = $request->validate(['enabled' => ['required', 'boolean'], 'reason' => ['nullable', 'string', 'max:200']]);
+
+        try {
+            $membership->setEnabled($member, (bool) $data['enabled'], $data['reason'] ?? null, $request->user()->id);
+        } catch (RuntimeException $e) {
+            return back()->with('error', $e->getMessage());
+        }
+
+        return back()->with('status', $data['enabled']
+            ? __(':name amewashwa na sasa ni mwanachama hai.', ['name' => $member->full_name])
+            : __(':name amezimwa. Hataweza kutumia USSD wala kuchangia hadi awashwe.', ['name' => $member->full_name]));
+    }
+
     public function reinstate(Request $request, Member $member, MembershipService $membership): RedirectResponse
     {
         $this->ensureGroup($member);

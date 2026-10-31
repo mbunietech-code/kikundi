@@ -7,8 +7,9 @@
     <x-page-header :title="__('Rekodi malipo ya ofisini')" :subtitle="__('Tumia hii kwa pesa ambayo tayari umeiona kwenye taarifa rasmi (taslimu, simu au benki).')" :back="route('payments.index')" />
 
     <form method="POST" action="{{ route('payments.store') }}" class="max-w-3xl"
-        x-data="{ target: '{{ old('target_type', request('target', 'dues')) }}' }">
+        x-data="{ target: '{{ old('target_type', request('target', 'dues')) }}', method: '{{ old('method', 'cash') }}' }">
         @csrf
+        <input type="hidden" name="form_token" value="{{ old('form_token', (string) \Illuminate\Support\Str::uuid()) }}">
         <x-card>
             <div class="grid gap-5 sm:grid-cols-2">
                 <div class="sm:col-span-2">
@@ -39,13 +40,14 @@
                 </div>
 
                 <x-input :label="__('Kiasi (TSh)')" name="amount" type="number" min="1" required />
-                <x-select :label="__('Njia ya malipo')" name="method" :options="$methods" value="cash" />
+                <x-select :label="__('Njia ya malipo')" name="method" :options="$methods" value="cash" x-model="method" />
                 <div class="sm:col-span-2">
-                    <x-input :label="__('Namba ya muamala / risiti')" name="transaction_id" required :hint="__('Kwa taslimu, tumia namba ya risiti ya kitabu. Namba moja haiwezi kurekodiwa mara mbili.')" />
+                    <x-input :label="__('Namba ya muamala')" name="transaction_id" ::required="method !== 'cash'"
+                        :hint="__('Kwa simu au benki, andika namba ya muamala. Kwa taslimu si lazima: mfumo unatoa namba ya risiti ya kipekee.')" />
                 </div>
             </div>
             <div class="mt-6 flex items-center justify-between gap-3 border-t border-slate-100 pt-5">
-                <p class="text-xs text-slate-500">{{ __('Mwanachama atapata SMS ya risiti.') }}</p>
+                <p class="text-xs text-slate-500">{{ __('Risiti yenye namba ya kipekee itatolewa na kutumwa kwa SMS.') }}</p>
                 <x-button icon="check">{{ __('Rekodi malipo') }}</x-button>
             </div>
         </x-card>

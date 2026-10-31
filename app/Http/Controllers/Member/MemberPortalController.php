@@ -6,9 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Models\Announcement;
 use App\Models\ContributionEvent;
 use App\Models\Member;
+use App\Models\Payment;
 use App\Models\PaymentIntent;
 use App\Services\Balances\BalanceService;
 use App\Services\Membership\MembershipService;
+use App\Services\Payments\ReceiptService;
 use App\Services\Reminders\ReminderService;
 use App\Services\Reports\ReportExporter;
 use App\Services\Reports\ReportPeriod;
@@ -47,7 +49,7 @@ class MemberPortalController extends Controller
             'payments' => PaymentIntent::query()
                 ->where(fn ($q) => $q->where('credited_member_id', $member->id)->orWhere('payer_member_id', $member->id))
                 ->whereIn('status', ['pending', 'succeeded'])
-                ->with(['payer', 'creditedMember'])->latest()->take(10)->get(),
+                ->with(['payer', 'creditedMember', 'payment'])->latest()->take(10)->get(),
             'announcements' => Announcement::query()->where('group_id', $member->group_id)->where('status', 'published')
                 ->where(fn ($q) => $q->whereNull('expires_at')->orWhere('expires_at', '>', now()))->latest('published_at')->take(3)->get(),
         ]);
@@ -61,6 +63,16 @@ class MemberPortalController extends Controller
         $year = $year >= 2000 && $year <= now()->year ? $year : now()->year;
 
         return $exporter->pdf($reports->member($member->group, ReportPeriod::year($year), $member));
+    }
+
+    /** A receipt for a payment the member made or that was credited to them. */
+    public function receipt(Payment $payment, ReceiptService $receipts): Response
+    {
+        $member = $this->member();
+        $intent = $payment->intent;
+        abort_unless($intent && in_array($member->id, [$intent->payer_member_id, $intent->credited_member_id], true), 404);
+
+        return $receipts->pdf($payment);
     }
 
     public function photo(): Response

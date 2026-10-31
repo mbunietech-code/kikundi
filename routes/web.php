@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\BackupController;
 use App\Http\Controllers\Admin\DeletionController;
+use App\Http\Controllers\Admin\IntegrationController;
 use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Dev\UssdSimulatorController;
@@ -51,6 +52,7 @@ Route::prefix('mwanachama')->name('member.')->group(function () {
     Route::middleware('auth:member')->group(function () {
         Route::get('/', [MemberPortalController::class, 'home'])->name('home');
         Route::get('taarifa.pdf', [MemberPortalController::class, 'statement'])->name('statement');
+        Route::get('risiti/{payment}', [MemberPortalController::class, 'receipt'])->name('receipt');
         Route::get('picha', [MemberPortalController::class, 'photo'])->name('photo');
         Route::get('pin', [MemberPortalController::class, 'editPin'])->name('pin');
         Route::put('pin', [MemberPortalController::class, 'updatePin'])->middleware('throttle:5,1');
@@ -70,6 +72,7 @@ Route::middleware(['auth', 'can:officer'])->group(function () {
         Route::put('members/{member}', [MemberController::class, 'update'])->name('members.update');
         Route::delete('members/{member}', [MemberController::class, 'destroy'])->name('members.destroy');
         Route::put('members/{member}/pin', [MemberController::class, 'updatePin'])->name('members.pin');
+        Route::post('members/{member}/toggle', [MembershipController::class, 'toggle'])->name('members.toggle');
         Route::post('members/{member}/reinstatement', [MembershipController::class, 'reinstate'])->name('members.reinstatement');
         Route::post('members/{member}/dependants', [DependantController::class, 'store'])->name('members.dependants.store');
         Route::delete('members/{member}/dependants/{dependant}', [DependantController::class, 'destroy'])->name('members.dependants.destroy');
@@ -113,6 +116,7 @@ Route::middleware(['auth', 'can:officer'])->group(function () {
         Route::get('dues', [DuesController::class, 'index'])->name('dues.index');
         Route::get('savings', [SavingsController::class, 'index'])->name('savings.index');
         Route::get('payments', [PaymentController::class, 'index'])->name('payments.index');
+        Route::get('receipts/{payment}', [PaymentController::class, 'receipt'])->name('payments.receipt');
 
         Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
         Route::get('reports/{type}', [ReportController::class, 'show'])->name('reports.show');
@@ -126,6 +130,10 @@ Route::middleware(['auth', 'can:officer'])->group(function () {
 
         Route::get('/admin/settings', [SettingsController::class, 'edit'])->name('admin.settings.edit');
         Route::put('/admin/settings', [SettingsController::class, 'update'])->name('admin.settings.update');
+
+        Route::get('/admin/integrations', [IntegrationController::class, 'edit'])->name('admin.integrations.edit');
+        Route::put('/admin/integrations', [IntegrationController::class, 'update'])->name('admin.integrations.update');
+        Route::post('/admin/integrations/test-sms', [IntegrationController::class, 'testSms'])->middleware('throttle:5,1')->name('admin.integrations.test-sms');
 
         Route::get('/admin/backups', [BackupController::class, 'index'])->name('admin.backups.index');
         Route::post('/admin/backups', [BackupController::class, 'store'])->name('admin.backups.store');

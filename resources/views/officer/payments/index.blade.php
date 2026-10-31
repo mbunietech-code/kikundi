@@ -46,7 +46,12 @@
                 @foreach ($payments as $p)
                     <tr x-data="{ open: false }" class="align-top">
                         <td class="px-5 py-3">
-                            <p class="font-mono text-xs font-semibold">{{ $p->reference }}</p>
+                            @if ($p->payment?->receipt_number)
+                                <a href="{{ route('payments.receipt', $p->payment) }}" target="_blank" class="font-mono text-xs font-semibold text-emerald-700 hover:underline">{{ $p->payment->receipt_number }}</a>
+                                <p class="font-mono text-[11px] text-slate-400">{{ $p->reference }}</p>
+                            @else
+                                <p class="font-mono text-xs font-semibold">{{ $p->reference }}</p>
+                            @endif
                             <p class="text-xs text-slate-500">{{ $p->created_at->format('d/m/Y H:i') }} · {{ $p->channel === 'ussd' ? 'USSD' : __('Ofisini') }}</p>
                         </td>
                         <td class="px-5 py-3">

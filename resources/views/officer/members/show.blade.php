@@ -14,6 +14,18 @@
             @endcan
             @can('manage-membership')
                 <x-button :href="route('members.edit', $member)" variant="secondary">{{ __('Hariri') }}</x-button>
+                @if (in_array($member->status, ['suspended', 'inactive'], true))
+                    <form method="POST" action="{{ route('members.toggle', $member) }}">
+                        @csrf <input type="hidden" name="enabled" value="1">
+                        <x-button icon="check">{{ __('Washa mwanachama') }}</x-button>
+                    </form>
+                @elseif ($member->status !== 'departed')
+                    <form method="POST" action="{{ route('members.toggle', $member) }}" x-data
+                        @submit="const r = prompt(@js(__('Sababu ya kumzima (si lazima):'))); if (r === null) { $event.preventDefault() } else { $el.reason.value = r }">
+                        @csrf <input type="hidden" name="enabled" value="0"><input type="hidden" name="reason">
+                        <x-button variant="secondary" class="text-rose-700">{{ __('Zima mwanachama') }}</x-button>
+                    </form>
+                @endif
             @endcan
         </x-slot:actions>
     </x-page-header>

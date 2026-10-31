@@ -92,20 +92,61 @@ class MembershipService
             ->countBy('member_id')
             ->filter(fn (int $months) => $months >= $grace);
 
-        $members = Member::query()->where('group_id', $groupId)->where('status', 'active')->whereIn('id', $late->keys())->get();
+        // Fixed contributions still unpaid this many days after their last day.
+        $eventGrace = (int) Settings::get('event_grace_days');
+        $lateEvents = collect();
+
+        if ($eventGrace > 0) {
+            $overdue = ContributionEvent::query()->where('group_id', $groupId)->where('status', 'active')
+                ->where('amount_per_member', '>', 0)->where('ends_at', '<', now()->subDays($eventGrace))->pluck('id');
+
+            $lateEvents = $overdue->isEmpty() ? collect() : $this->balances->eventDebts($groupId)
+                ->where('outstanding', '>', 0)->whereIn('event_id', $overdue->all())->countBy('member_id');
+        }
+
+        $members = Member::query()->where('group_id', $groupId)->where('status', 'active')
+            ->whereIn('id', $late->keys()->merge($lateEvents->keys())->unique())->get();
 
         foreach ($members as $member) {
-            $months = $late[$member->id];
-            $this->changeStatus($member, 'inactive', 'Hajalipa ada kwa miezi :months', null, ['months' => $months]);
+            if (isset($late[$member->id])) {
+                $months = $late[$member->id];
+                $this->changeStatus($member, 'inactive', 'Hajalipa ada kwa miezi :months', null, ['months' => $months]);
+                $message = __('Ndugu :name, kwa kutolipa ada miezi :months, wewe si mwanachama hai wa :system. Wasiliana na mweka hazina ili kurejea.',
+                    ['name' => $member->full_name, 'months' => $months, 'system' => Settings::systemName()], $member->preferredLocale());
+            } else {
+                $count = $lateEvents[$member->id];
+                $this->changeStatus($member, 'inactive', 'Hajalipa michango :count iliyopita muda wake', null, ['count' => $count]);
+                $message = __('Ndugu :name, kwa kutolipa michango :count iliyopita muda wake, wewe si mwanachama hai wa :system. Wasiliana na mweka hazina ili kurejea.',
+                    ['name' => $member->full_name, 'count' => $count, 'system' => Settings::systemName()], $member->preferredLocale());
+            }
 
-            SendSmsNotification::dispatch($member->phone, __(
-                'Ndugu :name, kwa kutolipa ada miezi :months, wewe si mwanachama hai wa :system. Wasiliana na mweka hazina ili kurejea.',
-                ['name' => $member->full_name, 'months' => $months, 'system' => Settings::systemName()],
-                $member->preferredLocale(),
-            ));
+            SendSmsNotification::dispatch($member->phone, $message);
         }
 
         return $members->count();
+    }
+
+    /**
+     * Switch a member off or back on by hand. Disabling suspends them;
+     * enabling brings back a suspended or not-active member at once.
+     */
+    public function setEnabled(Member $member, bool $enabled, ?string $reason, ?int $userId): void
+    {
+        if ($enabled) {
+            if (! in_array($member->status, ['suspended', 'inactive'], true)) {
+                throw new RuntimeException(__('Mwanachama huyu hajazimwa.'));
+            }
+
+            $this->changeStatus($member, 'active', $reason ?: 'Amewashwa tena na kiongozi', $userId);
+
+            return;
+        }
+
+        if (! in_array($member->status, ['active', 'inactive', 'pending'], true)) {
+            throw new RuntimeException(__('Mwanachama huyu tayari amezimwa au ameondoka.'));
+        }
+
+        $this->changeStatus($member, 'suspended', $reason ?: 'Amezimwa na kiongozi', $userId);
     }
 
     /** Ask a member who is not active to pay the reinstatement fee. */
