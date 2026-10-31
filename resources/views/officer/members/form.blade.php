@@ -42,6 +42,51 @@
         </x-card>
 
         @unless ($member->exists)
+            @php
+                $oldRows = old('guarantors', []);
+                $rowCount = max(1, $requiredGuarantors, count($oldRows));
+            @endphp
+            <x-card :title="__('Wadhamini')">
+                <p class="text-sm text-slate-600">
+                    {{ $requiredGuarantors ? __('Katiba inahitaji wadhamini :count kwa mwanachama mpya.', ['count' => $requiredGuarantors]) : __('Si lazima. Weka wanaomdhamini mwanachama huyu kujiunga na kikundi.') }}
+                    {{ __('Chagua mwanachama, au kwa mtu wa nje andika jina na simu.') }}
+                </p>
+                @if ($errors->has('guarantors') || $errors->has('guarantors.*'))
+                    <ul class="mt-3 space-y-1 rounded-lg bg-rose-50 p-3 text-xs text-rose-700">
+                        @foreach (array_unique(array_merge($errors->get('guarantors'), ...array_values($errors->get('guarantors.*')))) as $message)
+                            <li>{{ $message }}</li>
+                        @endforeach
+                    </ul>
+                @endif
+
+                <div class="mt-4 space-y-3" x-data="{ shown: {{ $rowCount }}, members: @js(array_map(fn ($row) => (string) ($row['member_id'] ?? ''), array_pad($oldRows, \App\Http\Controllers\Officer\GuarantorController::MAX, []))) }">
+                    @for ($i = 0; $i < \App\Http\Controllers\Officer\GuarantorController::MAX; $i++)
+                        <div x-show="shown > {{ $i }}" @if ($i >= $rowCount) x-cloak @endif class="grid gap-3 rounded-xl bg-slate-50 p-3 sm:grid-cols-2">
+                            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 sm:col-span-2">{{ __('Mdhamini :number', ['number' => $i + 1]) }}</p>
+                            <label class="block sm:col-span-2">
+                                <span class="text-sm font-medium text-slate-700">{{ __('Mwanachama') }}</span>
+                                <select name="guarantors[{{ $i }}][member_id]" x-model="members[{{ $i }}]" class="mt-1.5 block w-full rounded-lg border-0 px-3 py-2 text-sm shadow-sm ring-1 ring-inset ring-slate-300 focus:ring-2 focus:ring-emerald-600">
+                                    <option value="">{{ __('— Si mwanachama (mtu wa nje) —') }}</option>
+                                    @foreach ($guarantorOptions as $id => $label)
+                                        <option value="{{ $id }}" @selected((string) old("guarantors.$i.member_id") === (string) $id)>{{ $label }}</option>
+                                    @endforeach
+                                </select>
+                            </label>
+                            <template x-if="! members[{{ $i }}]">
+                                <div class="grid gap-3 sm:col-span-2 sm:grid-cols-2">
+                                    <x-input :label="__('Jina la mdhamini')" name="guarantors[{{ $i }}][name]" :value="old('guarantors.'.$i.'.name')" />
+                                    <x-input :label="__('Simu ya mdhamini')" name="guarantors[{{ $i }}][phone]" :value="old('guarantors.'.$i.'.phone')" placeholder="0712345678" inputmode="tel" />
+                                </div>
+                            </template>
+                            <div class="sm:col-span-2"><x-input :label="__('Uhusiano (si lazima)')" name="guarantors[{{ $i }}][relationship]" :value="old('guarantors.'.$i.'.relationship')" :placeholder="__('Mfano: rafiki, ndugu, jirani')" /></div>
+                        </div>
+                    @endfor
+                    <button type="button" x-show="shown < {{ \App\Http\Controllers\Officer\GuarantorController::MAX }}" @click="shown++" class="inline-flex items-center gap-1 text-sm font-medium text-emerald-700 hover:underline">
+                        <x-icon name="plus" class="h-4 w-4" /> {{ __('Ongeza mdhamini') }}
+                    </button>
+                </div>
+            </x-card>
+
             @if ($entryFee > 0)
                 <x-card :title="__('Kiingilio')">
                     <p class="text-sm text-slate-600">{!! __('Kiingilio ni :amount. Mwanachama mpya atakuwa :status hadi kiingilio kilipwe, kisha atakuwa hai mwenyewe.', ['amount' => '<span class="font-semibold text-slate-900">'.e(Money::format($entryFee)).'</span>', 'status' => '<span class="font-semibold text-amber-700">'.e(__('Inasubiri')).'</span>']) !!}</p>

@@ -234,6 +234,9 @@ class MembershipService
             $member->fees()->delete();
             $member->statusChanges()->delete();
             $member->dependants()->delete();
+            $member->guarantors()->delete();
+            // Records where this member vouched for others keep the name and phone.
+            $member->guaranteed()->update(['guarantor_member_id' => null]);
             $member->delete();
         });
 

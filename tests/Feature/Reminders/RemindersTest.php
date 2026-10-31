@@ -132,9 +132,9 @@ class RemindersTest extends TestCase
     public function test_receipt_says_what_was_paid_and_what_is_left(): void
     {
         $amina = $this->member('M001');
-        $this->payDues($amina, now()->subMonth()->format('Y-m'), 'R-9');
+        $this->payDues($amina, now()->subMonthNoOverflow()->format('Y-m'), 'R-9');
 
-        $month = now()->subMonth()->locale('sw')->translatedFormat('F Y');
+        $month = now()->subMonthNoOverflow()->locale('sw')->translatedFormat('F Y');
         $this->assertSame(1, $this->smsTo($amina, "Tumepokea TSh 10,000 kwa ada ya {$month}. Kumbukumbu"));
         $this->assertSame(1, $this->smsTo($amina, 'Deni lililobaki: TSh 10,000'));
     }

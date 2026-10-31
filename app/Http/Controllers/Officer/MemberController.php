@@ -60,6 +60,8 @@ class MemberController extends Controller
             'member' => new Member(['joined_at' => now(), 'member_number' => $this->nextMemberNumber()]),
             'statuses' => self::MANUAL_STATUSES,
             'entryFee' => (int) Settings::get('entry_fee'),
+            'guarantorOptions' => $this->guarantorOptions(),
+            'requiredGuarantors' => (int) Settings::get('min_guarantors'),
         ]);
     }
 
@@ -69,9 +71,21 @@ class MemberController extends Controller
             $request->merge(['member_number' => $this->nextMemberNumber()]);
         }
 
-        $member = Member::query()->create($this->validated($request) + ['group_id' => $this->groupId()]);
+        $data = $this->validated($request);
+        $guarantors = app(GuarantorController::class)->validatedRows($request);
+
+        // The constitution may require a number of guarantors for new members.
+        $required = (int) Settings::get('min_guarantors');
+        if (count($guarantors) < $required) {
+            return back()->withInput()->withErrors(['guarantors' => __('Mwanachama mpya anahitaji wadhamini :count.', ['count' => $required])]);
+        }
+
+        $member = Member::query()->create($data + ['group_id' => $this->groupId()]);
         $this->storePhoto($request, $member);
         $membership->register($member, $request->boolean('entry_fee_paid'), $request->user()->id);
+        foreach ($guarantors as $row) {
+            GuarantorController::attach($member, $row);
+        }
 
         return redirect()->route('members.show', $member)->with('status', $member->status === 'pending'
             ? __('Mwanachama :name (:number) amesajiliwa. Atakuwa hai akilipa kiingilio.', ['name' => $member->full_name, 'number' => $member->member_number])
@@ -86,7 +100,9 @@ class MemberController extends Controller
             ->map(fn ($o) => ['obligation' => $o, 'paid' => $balances->allocatedTo('dues', $o->id)]);
 
         return view('officer.members.show', [
-            'member' => $member->load(['dependants', 'statusChanges' => fn ($q) => $q->with('changedBy')->latest('id')]),
+            'member' => $member->load(['dependants', 'guarantors.guarantorMember', 'guaranteed.member', 'statusChanges' => fn ($q) => $q->with('changedBy')->latest('id')]),
+            'guarantorOptions' => $this->guarantorOptions($member),
+            'requiredGuarantors' => (int) Settings::get('min_guarantors'),
             'fees' => $member->fees()->latest('id')->get()->map(fn ($fee) => ['fee' => $fee, 'paid' => $balances->allocatedTo('membership_fee', $fee->id)]),
             'missing' => in_array($member->status, ['pending', 'inactive'], true) ? $membership->missingConditions($member) : [],
             'unpaidMonths' => $membership->unpaidMonths($member),
@@ -197,6 +213,15 @@ class MemberController extends Controller
         if ($old) {
             Storage::disk('local')->delete($old);
         }
+    }
+
+    /** Active members who can vouch for someone, as select options. */
+    private function guarantorOptions(?Member $except = null): array
+    {
+        return Member::query()->where('group_id', $this->groupId())->where('status', 'active')
+            ->when($except, fn ($q) => $q->whereKeyNot($except->id))
+            ->orderBy('member_number')->get()
+            ->mapWithKeys(fn ($m) => [$m->id => "{$m->member_number} · {$m->full_name}"])->all();
     }
 
     /** Next free number in the group's M001 style. */

@@ -58,6 +58,18 @@ class Member extends Model implements AuthenticatableContract
         return $this->hasMany(MembershipFee::class);
     }
 
+    /** People who vouched for this member when they joined. */
+    public function guarantors(): HasMany
+    {
+        return $this->hasMany(MemberGuarantor::class);
+    }
+
+    /** Members this member has vouched for. */
+    public function guaranteed(): HasMany
+    {
+        return $this->hasMany(MemberGuarantor::class, 'guarantor_member_id');
+    }
+
     public function statusChanges(): HasMany
     {
         return $this->hasMany(MemberStatusChange::class);

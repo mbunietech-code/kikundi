@@ -139,6 +139,80 @@
                 @endcan
             </x-card>
 
+            <x-card :title="__('Wadhamini')">
+                @if ($member->guarantors->count() < $requiredGuarantors)
+                    <p class="mb-3 rounded-lg bg-amber-50 p-3 text-xs text-amber-800">{{ __('Katiba inahitaji wadhamini :count; ana :have.', ['count' => $requiredGuarantors, 'have' => $member->guarantors->count()]) }}</p>
+                @endif
+                <ul class="divide-y divide-slate-100">
+                    @forelse ($member->guarantors as $guarantor)
+                        <li class="flex items-start justify-between gap-3 py-2.5 text-sm">
+                            <span>
+                                @if ($guarantor->guarantorMember)
+                                    <a href="{{ route('members.show', $guarantor->guarantorMember) }}" class="font-medium text-slate-900 hover:text-emerald-700">{{ $guarantor->guarantorMember->full_name }}</a>
+                                    <span class="text-slate-500">· {{ $guarantor->guarantorMember->member_number }}</span>
+                                @else
+                                    <span class="font-medium text-slate-900">{{ $guarantor->name }}</span>
+                                    <span class="text-slate-500">· {{ __('Si mwanachama') }}</span>
+                                @endif
+                                <span class="block text-xs text-slate-500">
+                                    {{ $guarantor->phone ? '0'.substr($guarantor->phone, 3) : '' }}{{ $guarantor->phone && $guarantor->relationship ? ' · ' : '' }}{{ $guarantor->relationship }}
+                                </span>
+                            </span>
+                            @can('manage-membership')
+                                <form method="POST" action="{{ route('members.guarantors.destroy', [$member, $guarantor]) }}">
+                                    @csrf @method('DELETE')
+                                    <button class="text-xs text-slate-400 hover:text-rose-600">{{ __('Ondoa') }}</button>
+                                </form>
+                            @endcan
+                        </li>
+                    @empty
+                        <li class="py-2 text-sm text-slate-500">{{ __('Hakuna mdhamini aliyesajiliwa.') }}</li>
+                    @endforelse
+                </ul>
+                @can('manage-membership')
+                    @if ($member->guarantors->count() < \App\Http\Controllers\Officer\GuarantorController::MAX)
+                        <form method="POST" action="{{ route('members.guarantors.store', $member) }}" x-data="{ picked: @js((string) old('guarantors.0.member_id', '')) }" class="mt-4 space-y-3 border-t border-slate-100 pt-4">
+                            @csrf
+                            @if ($errors->has('guarantors') || $errors->has('guarantors.*'))
+                                <ul class="space-y-1 rounded-lg bg-rose-50 p-3 text-xs text-rose-700">
+                                    @foreach (array_unique(array_merge($errors->get('guarantors'), ...array_values($errors->get('guarantors.*')))) as $message)
+                                        <li>{{ $message }}</li>
+                                    @endforeach
+                                </ul>
+                            @endif
+                            <label class="block">
+                                <span class="text-sm font-medium text-slate-700">{{ __('Mwanachama') }}</span>
+                                <select name="guarantors[0][member_id]" x-model="picked" class="mt-1.5 block w-full rounded-lg border-0 px-3 py-2 text-sm shadow-sm ring-1 ring-inset ring-slate-300 focus:ring-2 focus:ring-emerald-600">
+                                    <option value="">{{ __('— Si mwanachama (mtu wa nje) —') }}</option>
+                                    @foreach ($guarantorOptions as $id => $label)
+                                        <option value="{{ $id }}">{{ $label }}</option>
+                                    @endforeach
+                                </select>
+                            </label>
+                            <template x-if="! picked">
+                                <div class="grid grid-cols-2 gap-3">
+                                    <x-input :label="__('Jina la mdhamini')" name="guarantors[0][name]" :value="old('guarantors.0.name')" />
+                                    <x-input :label="__('Simu ya mdhamini')" name="guarantors[0][phone]" :value="old('guarantors.0.phone')" placeholder="0712345678" inputmode="tel" />
+                                </div>
+                            </template>
+                            <x-input :label="__('Uhusiano (si lazima)')" name="guarantors[0][relationship]" :value="old('guarantors.0.relationship')" :placeholder="__('Mfano: rafiki, ndugu, jirani')" />
+                            <x-button variant="secondary" icon="plus" class="w-full">{{ __('Ongeza mdhamini') }}</x-button>
+                        </form>
+                    @endif
+                @endcan
+
+                @if ($member->guaranteed->isNotEmpty())
+                    <div class="mt-4 border-t border-slate-100 pt-4">
+                        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">{{ __('Amewadhamini') }}</p>
+                        <ul class="mt-2 space-y-1 text-sm">
+                            @foreach ($member->guaranteed as $link)
+                                <li><a href="{{ route('members.show', $link->member) }}" class="text-slate-700 hover:text-emerald-700">{{ $link->member->member_number }} · {{ $link->member->full_name }}</a></li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+            </x-card>
+
             @can('manage-membership')
                 <x-card :title="__('Futa mwanachama')" class="border-rose-200">
                     @if ($canDelete)

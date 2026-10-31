@@ -24,6 +24,7 @@ class Settings
         'entry_fee' => '20000',
         'reinstatement_fee' => '20000',
         'reinstate_requires_arrears' => '1',
+        'min_guarantors' => '0',
         // Payment deadlines and SMS reminders.
         'dues_due_day' => '10',
         'reminder_days_before' => '3',

@@ -46,7 +46,7 @@ class DatabaseSeeder extends Seeder
         ]));
 
         // Amina has two unpaid months; the USSD tests rely on this.
-        foreach ([now()->subMonth(), now()] as $month) {
+        foreach ([now()->subMonthNoOverflow(), now()] as $month) {
             Obligation::query()->create([
                 'group_id' => $group->id,
                 'member_id' => $members[0]->id,

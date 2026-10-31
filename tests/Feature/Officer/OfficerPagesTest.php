@@ -106,7 +106,7 @@ class OfficerPagesTest extends TestCase
     public function test_generating_dues_twice_does_not_duplicate(): void
     {
         $admin = $this->officer();
-        $period = now()->addMonth()->format('Y-m');
+        $period = now()->addMonthNoOverflow()->format('Y-m');
 
         $this->actingAs($admin)->post('/dues/generate', ['period' => $period]);
         $this->actingAs($admin)->post('/dues/generate', ['period' => $period]);

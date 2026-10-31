@@ -13,6 +13,7 @@ use App\Http\Controllers\Officer\ContributionEventController;
 use App\Http\Controllers\Officer\DashboardController;
 use App\Http\Controllers\Officer\DependantController;
 use App\Http\Controllers\Officer\DuesController;
+use App\Http\Controllers\Officer\GuarantorController;
 use App\Http\Controllers\Officer\MemberController;
 use App\Http\Controllers\Officer\MembershipController;
 use App\Http\Controllers\Officer\PaymentController;
@@ -72,6 +73,8 @@ Route::middleware(['auth', 'can:officer'])->group(function () {
         Route::post('members/{member}/reinstatement', [MembershipController::class, 'reinstate'])->name('members.reinstatement');
         Route::post('members/{member}/dependants', [DependantController::class, 'store'])->name('members.dependants.store');
         Route::delete('members/{member}/dependants/{dependant}', [DependantController::class, 'destroy'])->name('members.dependants.destroy');
+        Route::post('members/{member}/guarantors', [GuarantorController::class, 'store'])->name('members.guarantors.store');
+        Route::delete('members/{member}/guarantors/{guarantor}', [GuarantorController::class, 'destroy'])->name('members.guarantors.destroy');
 
         Route::post('announcements', [AnnouncementController::class, 'store'])->name('announcements.store');
         Route::post('announcements/{announcement}/publish', [AnnouncementController::class, 'publish'])->name('announcements.publish');
