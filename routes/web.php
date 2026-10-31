@@ -135,6 +135,7 @@ Route::middleware(['auth', 'can:officer'])->group(function () {
         Route::get('/admin/integrations', [IntegrationController::class, 'edit'])->name('admin.integrations.edit');
         Route::put('/admin/integrations', [IntegrationController::class, 'update'])->name('admin.integrations.update');
         Route::post('/admin/integrations/test-sms', [IntegrationController::class, 'testSms'])->middleware('throttle:5,1')->name('admin.integrations.test-sms');
+        Route::post('/admin/integrations/test-sms/delivery', [IntegrationController::class, 'delivery'])->middleware('throttle:10,1')->name('admin.integrations.delivery');
 
         Route::get('/admin/backups', [BackupController::class, 'index'])->name('admin.backups.index');
         Route::post('/admin/backups', [BackupController::class, 'store'])->name('admin.backups.store');

@@ -10,6 +10,20 @@
 @section('content')
     <x-page-header :title="__('SMS na malipo')" :subtitle="__('Funguo za Beem (SMS) na ClickPesa (malipo kwa simu). Funguo za siri huhifadhiwa kwa usimbaji na hazionyeshwi tena.')" />
 
+    @if ($smsDriver !== 'beem')
+        <div class="mb-6 max-w-5xl rounded-xl bg-amber-50 p-4 text-sm text-amber-900 ring-1 ring-amber-200">
+            <p class="font-semibold">{{ __('SMS hazitumwi kwa wanachama sasa.') }}</p>
+            <p class="mt-1">{{ __('"Kutuma SMS" imewekwa "Usitume". Chagua "Tuma SMS halisi kupitia Beem" kisha Hifadhi, ili risiti na ukumbusho viwafikie wanachama.') }}</p>
+        </div>
+    @endif
+    @if ($stuckJobs > 0)
+        <div class="mb-6 max-w-5xl rounded-xl bg-rose-50 p-4 text-sm text-rose-900 ring-1 ring-rose-200">
+            <p class="font-semibold">{{ __('SMS :count zimekwama kwenye foleni.', ['count' => $stuckJobs]) }}</p>
+            <p class="mt-1">{{ __('Hakuna kinachoendesha foleni kwenye seva. Weka Cron Job kwenye Hostinger (hPanel → Advanced → Cron Jobs), kila dakika, yenye amri hii:') }}</p>
+            <p class="mt-2 break-all rounded bg-white/70 p-2 font-mono text-xs">{{ $cronCommand }}</p>
+        </div>
+    @endif
+
     <div class="grid max-w-5xl gap-6 lg:grid-cols-3">
         <form method="POST" action="{{ route('admin.integrations.update') }}" class="space-y-6 lg:col-span-2">
             @csrf
@@ -71,6 +85,13 @@
                         <x-input :label="__('Tuma SMS ya jaribio kwa')" name="phone" placeholder="0712345678" inputmode="tel" />
                         <x-button variant="secondary" class="w-full">{{ __('Tuma jaribio') }}</x-button>
                     </form>
+                    @if ($beemTest && $beemTest['request_id'])
+                        <form method="POST" action="{{ route('admin.integrations.delivery') }}" class="mt-3">
+                            @csrf
+                            <p class="mb-2 text-xs text-slate-500">{{ __('Jaribio la mwisho: 0:phone saa :time', ['phone' => substr($beemTest['phone'], 3), 'time' => $beemTest['at']]) }}</p>
+                            <x-button variant="ghost" class="w-full">{{ __('Angalia kama imefika') }}</x-button>
+                        </form>
+                    @endif
                 @endif
             </x-card>
 

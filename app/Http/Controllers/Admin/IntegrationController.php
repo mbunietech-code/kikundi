@@ -9,6 +9,7 @@ use App\Support\Phone;
 use App\Support\Settings;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
@@ -59,6 +60,10 @@ class IntegrationController extends Controller
             'clickpesaBalance' => $clickpesaBalance,
             'clickpesaError' => $clickpesaError,
             'webhookUrl' => route('clickpesa.webhook', $settings['clickpesa_webhook_token']),
+            'beemTest' => session('beem_test'),
+            // Jobs waiting over 5 minutes mean nothing is running the queue.
+            'stuckJobs' => DB::table('jobs')->where('created_at', '<', now()->subMinutes(5)->getTimestamp())->count(),
+            'cronCommand' => '/usr/bin/php '.base_path('artisan').' schedule:run',
         ]);
     }
 
@@ -104,11 +109,32 @@ class IntegrationController extends Controller
         }
 
         try {
-            $beem->send($phone, __('Jaribio la SMS kutoka :system. Beem imeunganishwa.', ['system' => Settings::systemName()]));
+            $requestId = $beem->send($phone, __('Jaribio la SMS kutoka :system. Beem imeunganishwa.', ['system' => Settings::systemName()]));
         } catch (Throwable $e) {
             return back()->with('error', __('SMS haikutumwa: :reason', ['reason' => mb_substr($e->getMessage(), 0, 200)]));
         }
 
-        return back()->with('status', __('SMS ya jaribio imetumwa kwa :phone.', ['phone' => '0'.substr($phone, 3)]));
+        $request->session()->put('beem_test', ['phone' => $phone, 'request_id' => $requestId, 'at' => now()->format('H:i')]);
+
+        return back()->with('status', __('Beem imepokea SMS kwa :phone. Subiri dakika moja kisha bonyeza "Angalia kama imefika".', ['phone' => '0'.substr($phone, 3)]));
+    }
+
+    /** Ask Beem whether the last test SMS reached the phone. */
+    public function delivery(Request $request, BeemSmsGateway $beem): RedirectResponse
+    {
+        $test = $request->session()->get('beem_test');
+
+        if (! $test || ! $test['request_id']) {
+            return back()->with('error', __('Hakuna SMS ya jaribio ya kuangalia.'));
+        }
+
+        try {
+            $status = $beem->deliveryStatus($test['phone'], $test['request_id']);
+        } catch (Throwable $e) {
+            return back()->with('error', __('Hali haikupatikana: :reason', ['reason' => mb_substr($e->getMessage(), 0, 200)]));
+        }
+
+        return back()->with(strtoupper((string) $status) === 'DELIVERED' ? 'status' : 'error',
+            __('Hali ya SMS kwa :phone kwa mujibu wa Beem: :status', ['phone' => '0'.substr($test['phone'], 3), 'status' => $status ?: __('bado haijaripotiwa')]));
     }
 }

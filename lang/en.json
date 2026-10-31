@@ -780,5 +780,16 @@
     "Mchango \":title\" umefutwa.": "Contribution \":title\" deleted.",
     "Mchango huu una malipo ya :amount. Ukiufuta, malipo yake yote yatafutwa. Andika sababu:": "This contribution has :amount in payments. Deleting it deletes all its payments too. Enter a reason:",
     "Andika sababu ya herufi 5 au zaidi.": "Enter a reason of 5 characters or more.",
-    "Futa mchango \":title\"?": "Delete contribution \":title\"?"
+    "Futa mchango \":title\"?": "Delete contribution \":title\"?",
+    "Beem imepokea SMS kwa :phone. Subiri dakika moja kisha bonyeza \"Angalia kama imefika\".": "Beem accepted the SMS to :phone. Wait a minute, then press \"Check if it arrived\".",
+    "Hakuna SMS ya jaribio ya kuangalia.": "There is no test SMS to check.",
+    "Hali haikupatikana: :reason": "Could not get the status: :reason",
+    "Hali ya SMS kwa :phone kwa mujibu wa Beem: :status": "Status of the SMS to :phone according to Beem: :status",
+    "bado haijaripotiwa": "not reported yet",
+    "SMS hazitumwi kwa wanachama sasa.": "SMS are not being sent to members right now.",
+    "\"Kutuma SMS\" imewekwa \"Usitume\". Chagua \"Tuma SMS halisi kupitia Beem\" kisha Hifadhi, ili risiti na ukumbusho viwafikie wanachama.": "\"Sending SMS\" is set to \"Don't send\". Choose \"Send real SMS through Beem\" and save, so receipts and reminders reach members.",
+    "SMS :count zimekwama kwenye foleni.": ":count SMS are stuck in the queue.",
+    "Hakuna kinachoendesha foleni kwenye seva. Weka Cron Job kwenye Hostinger (hPanel → Advanced → Cron Jobs), kila dakika, yenye amri hii:": "Nothing is running the queue on the server. Add a Cron Job in Hostinger (hPanel → Advanced → Cron Jobs), every minute, with this command:",
+    "Jaribio la mwisho: 0:phone saa :time": "Last test: 0:phone at :time",
+    "Angalia kama imefika": "Check if it arrived"
 }

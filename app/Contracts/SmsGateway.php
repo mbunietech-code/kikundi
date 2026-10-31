@@ -4,5 +4,6 @@ namespace App\Contracts;
 
 interface SmsGateway
 {
-    public function send(string $msisdn, string $message): void;
+    /** Returns the provider's message id when it gives one. */
+    public function send(string $msisdn, string $message): ?string;
 }
