@@ -224,11 +224,22 @@ class MemberController extends Controller
     }
 
     /** Next free number in the group's M001 style. */
+    /**
+     * The next number in the group's own format: after UWABU/010 comes
+     * UWABU/011, after M009 comes M010. A group with no members starts at M001.
+     */
     private function nextMemberNumber(): string
     {
-        $highest = Member::query()->where('group_id', $this->groupId())->where('member_number', 'like', 'M%')->pluck('member_number')
-            ->map(fn ($n) => (int) preg_replace('/\D/', '', $n))->max() ?? 0;
+        $last = Member::query()->where('group_id', $this->groupId())->pluck('member_number')
+            ->map(fn ($n) => preg_match('/^(.*?)(\d+)$/', (string) $n, $m) ? ['prefix' => $m[1], 'digits' => $m[2], 'value' => (int) $m[2]] : null)
+            ->filter()
+            ->sortBy('value')
+            ->last();
 
-        return 'M'.str_pad((string) ($highest + 1), 3, '0', STR_PAD_LEFT);
+        if (! $last) {
+            return 'M001';
+        }
+
+        return $last['prefix'].str_pad((string) ($last['value'] + 1), strlen($last['digits']), '0', STR_PAD_LEFT);
     }
 }
