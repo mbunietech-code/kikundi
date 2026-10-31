@@ -67,9 +67,8 @@ class MemberController extends Controller
 
     public function store(Request $request, MembershipService $membership): RedirectResponse
     {
-        if (blank($request->input('member_number'))) {
-            $request->merge(['member_number' => $this->nextMemberNumber()]);
-        }
+        // Numbers are given in order at the moment of saving, never typed in.
+        $request->merge(['member_number' => $this->nextMemberNumber()]);
 
         $data = $this->validated($request);
         $guarantors = app(GuarantorController::class)->validatedRows($request);

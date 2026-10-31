@@ -794,5 +794,6 @@
     "Angalia kama imefika": "Check if it arrived",
     "Weka namba sahihi ya simu, mfano 0712345678, au ya nje ya nchi kwa + na msimbo wa nchi, mfano +86 138 0013 8000.": "Enter a valid phone number, e.g. 0712345678, or a foreign one with + and the country code, e.g. +86 138 0013 8000.",
     "Jaribio la mwisho: :phone saa :time": "Last test: :phone at :time",
-    "Tanzania: 07XXXXXXXX. Nje ya nchi: anza na + na msimbo wa nchi, mfano +86 138 0013 8000.": "Tanzania: 07XXXXXXXX. Abroad: start with + and the country code, e.g. +86 138 0013 8000."
+    "Tanzania: 07XXXXXXXX. Nje ya nchi: anza na + na msimbo wa nchi, mfano +86 138 0013 8000.": "Tanzania: 07XXXXXXXX. Abroad: start with + and the country code, e.g. +86 138 0013 8000.",
+    "Inatolewa na mfumo kwa mpangilio wakati wa kuhifadhi.": "Given by the system in order when you save."
 }

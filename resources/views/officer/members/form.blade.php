@@ -13,8 +13,15 @@
         @if ($member->exists) @method('PUT') @endif
         <x-card>
             <div class="grid gap-5 sm:grid-cols-2">
-                <x-input :label="__('Namba ya uanachama')" name="member_number" :value="$member->member_number" placeholder="M001" required
-                    :hint="$member->exists ? null : __('Imejazwa namba inayofuata. Unaweza kuibadilisha.')" />
+                @if ($member->exists)
+                    <x-input :label="__('Namba ya uanachama')" name="member_number" :value="$member->member_number" placeholder="M001" required />
+                @else
+                    <div>
+                        <span class="text-sm font-medium text-slate-700">{{ __('Namba ya uanachama') }}</span>
+                        <p class="mt-1.5 rounded-lg bg-slate-50 px-3 py-2 font-mono text-sm font-semibold text-slate-900 ring-1 ring-inset ring-slate-200">{{ $member->member_number }}</p>
+                        <span class="mt-1 block text-xs text-slate-500">{{ __('Inatolewa na mfumo kwa mpangilio wakati wa kuhifadhi.') }}</span>
+                    </div>
+                @endif
                 <x-input :label="__('Jina kamili')" name="full_name" :value="$member->full_name" required />
                 <x-input :label="__('Simu')" name="phone" :value="\App\Support\Phone::display($member->phone) ?: null" placeholder="0712345678" :hint="__('Tanzania: 07XXXXXXXX. Nje ya nchi: anza na + na msimbo wa nchi, mfano +86 138 0013 8000.')" required />
                 <x-input :label="__('Tarehe ya kujiunga')" name="joined_at" type="date" :value="$member->joined_at?->format('Y-m-d')" required />
