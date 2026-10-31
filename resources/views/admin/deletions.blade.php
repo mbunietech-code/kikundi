@@ -16,7 +16,7 @@
                     <tr x-data="{ open: false }" class="align-top">
                         <td class="whitespace-nowrap px-5 py-3 text-slate-500">{{ $log->created_at->format('d/m/Y H:i') }}</td>
                         <td class="px-5 py-3">
-                            <x-badge :tone="$log->kind === 'member' ? 'rose' : 'amber'">{{ $log->kind === 'member' ? __('Mwanachama') : __('Malipo') }}</x-badge>
+                            <x-badge :tone="$log->kind === 'payment' ? 'amber' : 'rose'">{{ ['member' => __('Mwanachama'), 'event' => __('Mchango')][$log->kind] ?? __('Malipo') }}</x-badge>
                             <span class="ml-1 font-medium">{{ $log->subject }}</span>
                             @if (count($log->details['payments'] ?? []))
                                 <button type="button" @click="open = !open" class="ml-2 text-xs text-emerald-700 hover:underline">{{ __('Malipo :count', ['count' => count($log->details['payments'])]) }}</button>

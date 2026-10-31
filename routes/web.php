@@ -96,6 +96,7 @@ Route::middleware(['auth', 'can:officer'])->group(function () {
         Route::post('events', [ContributionEventController::class, 'store'])->name('events.store');
         Route::get('events/{event}/edit', [ContributionEventController::class, 'edit'])->name('events.edit');
         Route::put('events/{event}', [ContributionEventController::class, 'update'])->name('events.update');
+        Route::delete('events/{event}', [ContributionEventController::class, 'destroy'])->name('events.destroy');
     });
     Route::get('events', [ContributionEventController::class, 'index'])->name('events.index');
     Route::get('events/{event}', [ContributionEventController::class, 'show'])->name('events.show');

@@ -3,6 +3,7 @@
 namespace App\Services\Payments;
 
 use App\Models\Allocation;
+use App\Models\ContributionEvent;
 use App\Models\DeletionLog;
 use App\Models\Member;
 use App\Models\Payment;
@@ -35,6 +36,32 @@ class PaymentRemovalService
                 'subject' => $intent->reference.' · '.$row['member'],
                 'amount' => $row['status'] === 'succeeded' ? $row['amount'] : 0,
                 'details' => ['payments' => [$row]],
+                'reason' => $reason,
+            ]);
+        });
+    }
+
+    /**
+     * Delete a contribution event with every payment made to it. Balances
+     * and reports lose those payments, so the log keeps a copy of each.
+     */
+    public function deleteEvent(ContributionEvent $event, string $reason, User $user): DeletionLog
+    {
+        return DB::transaction(function () use ($event, $reason, $user) {
+            $intents = PaymentIntent::query()->with(['payer', 'creditedMember'])
+                ->where('target_type', 'event')->where('target_id', $event->id)->get();
+            $rows = $intents->map(fn ($intent) => $this->describe($intent))->all();
+
+            $intents->each(fn ($intent) => $this->remove($intent));
+            $event->delete();
+
+            return DeletionLog::query()->create([
+                'group_id' => $event->group_id,
+                'user_id' => $user->id,
+                'kind' => 'event',
+                'subject' => $event->title,
+                'amount' => (int) collect($rows)->where('status', 'succeeded')->sum('amount'),
+                'details' => ['payments' => $rows],
                 'reason' => $reason,
             ]);
         });

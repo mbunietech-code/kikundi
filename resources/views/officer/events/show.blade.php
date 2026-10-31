@@ -11,6 +11,7 @@
             @endcan
             @can('manage-events')
                 <x-button :href="route('events.edit', $event)" variant="secondary">{{ __('Hariri') }}</x-button>
+                @include('officer.events.partials.delete', ['event' => $event, 'hasMoney' => $total > 0, 'compact' => false])
             @endcan
         </x-slot:actions>
     </x-page-header>

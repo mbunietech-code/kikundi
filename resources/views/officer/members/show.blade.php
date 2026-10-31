@@ -125,32 +125,6 @@
             </x-card>
             @endcan
 
-            <x-card :title="__('Wategemezi')">
-                <ul class="divide-y divide-slate-100">
-                    @forelse ($member->dependants->where('status', 'active') as $dependant)
-                        <li class="flex items-center justify-between py-2.5 text-sm">
-                            <span><span class="font-medium text-slate-900">{{ $dependant->name }}</span> <span class="text-slate-500">· {{ __(DependantController::RELATIONSHIPS[$dependant->relationship] ?? $dependant->relationship) }}</span></span>
-                            @can('manage-membership')
-                                <form method="POST" action="{{ route('members.dependants.destroy', [$member, $dependant]) }}">
-                                    @csrf @method('DELETE')
-                                    <button class="text-xs text-slate-400 hover:text-rose-600">{{ __('Ondoa') }}</button>
-                                </form>
-                            @endcan
-                        </li>
-                    @empty
-                        <li class="py-2 text-sm text-slate-500">{{ __('Hakuna mtegemezi aliyesajiliwa.') }}</li>
-                    @endforelse
-                </ul>
-                @can('manage-membership')
-                    <form method="POST" action="{{ route('members.dependants.store', $member) }}" class="mt-4 grid grid-cols-2 gap-3 border-t border-slate-100 pt-4">
-                        @csrf
-                        <x-input :label="__('Jina')" name="name" />
-                        <x-select :label="__('Uhusiano')" name="relationship" :options="DependantController::RELATIONSHIPS" />
-                        <div class="col-span-2"><x-button variant="secondary" icon="plus" class="w-full">{{ __('Ongeza mtegemezi') }}</x-button></div>
-                    </form>
-                @endcan
-            </x-card>
-
             <x-card :title="__('Wadhamini')">
                 @if ($member->guarantors->count() < $requiredGuarantors)
                     <p class="mb-3 rounded-lg bg-amber-50 p-3 text-xs text-amber-800">{{ __('Katiba inahitaji wadhamini :count; ana :have.', ['count' => $requiredGuarantors, 'have' => $member->guarantors->count()]) }}</p>

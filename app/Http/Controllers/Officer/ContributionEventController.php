@@ -6,7 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\Allocation;
 use App\Models\ContributionEvent;
 use App\Models\Member;
+use App\Models\PaymentIntent;
 use App\Services\Balances\BalanceService;
+use App\Services\Payments\PaymentRemovalService;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -91,6 +93,28 @@ class ContributionEventController extends Controller
         $event->update($this->validated($request, $event));
 
         return redirect()->route('events.show', $event)->with('status', __('Mchango umesasishwa.'));
+    }
+
+    /**
+     * An event with no money in it can be deleted by any events officer.
+     * One with contributions only by the administrator, with a reason.
+     */
+    public function destroy(Request $request, ContributionEvent $event, PaymentRemovalService $removal): RedirectResponse
+    {
+        Gate::authorize('manage-events');
+        $this->ensureGroup($event);
+
+        $hasMoney = PaymentIntent::query()->where('target_type', 'event')->where('target_id', $event->id)->where('status', 'succeeded')->exists();
+
+        if ($hasMoney) {
+            Gate::authorize('manage-system');
+        }
+
+        $data = $request->validate(['reason' => [$hasMoney ? 'required' : 'nullable', 'string', 'min:5', 'max:300']], [], ['reason' => __('sababu')]);
+
+        $removal->deleteEvent($event, $data['reason'] ?? __('Mchango usio na malipo'), $request->user());
+
+        return redirect()->route('events.index')->with('status', __('Mchango ":title" umefutwa.', ['title' => $event->title]));
     }
 
     /**

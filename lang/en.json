@@ -775,5 +775,10 @@
     "Kiasi kilichopokelewa": "Amount received",
     "Malipo ya": "Payment for",
     "Imepokelewa na": "Received by",
-    "Asante kwa malipo yako.": "Thank you for your payment."
+    "Asante kwa malipo yako.": "Thank you for your payment.",
+    "Mchango usio na malipo": "Contribution with no payments",
+    "Mchango \":title\" umefutwa.": "Contribution \":title\" deleted.",
+    "Mchango huu una malipo ya :amount. Ukiufuta, malipo yake yote yatafutwa. Andika sababu:": "This contribution has :amount in payments. Deleting it deletes all its payments too. Enter a reason:",
+    "Andika sababu ya herufi 5 au zaidi.": "Enter a reason of 5 characters or more.",
+    "Futa mchango \":title\"?": "Delete contribution \":title\"?"
 }
